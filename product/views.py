@@ -21,7 +21,7 @@ def category_list_api_view(request):
         create_category = Category.objects.create(name=name)
         create_category.save()
         #3
-        return Response(status='HTTP_201_CREATED',
+        return Response(status=201,
                         data={'message': 'Category created',
                               'create_category': {'id': create_category.id,
                                                   'name': create_category.name}})
@@ -42,12 +42,12 @@ def category_detail_api_view(request, category_id):
     elif request.method == 'PUT':
         category.name = request.data.get('name')
         category.save()
-        return Response(status='HTTP_201_CREATED',
+        return Response(status=201,
                         data={'message': 'Category updated'})
 
     elif request.method == 'DELETE':
         category.delete()
-        return Response(status='HTTP_204_NO_CONTENT',
+        return Response(status=204,
                         data={'message': 'Category Destoyed'})
 
 
@@ -72,7 +72,7 @@ def product_list_api_view(request):
                                                  price=price, category_id=category_id)
         create_product.save()
         #3
-        return Response(status='HTTP_201_CREATED',
+        return Response(status=201,
                         data={'message': 'Product created',
                               'create_product': {'id': create_product.id,
                                                  'title': create_product.title}})
@@ -95,12 +95,12 @@ def product_detail_api_view(request, product_id):
         product.price = request.data.get('price')
         product.category_id = request.data.get('category_id')
         product.save()
-        return Response(status='HTTP_201_CREATED',
+        return Response(status=201,
                         data={'message': 'Product updated'})
 
     elif request.method == 'DELETE':
         product.delete()
-        return Response(status='HTTP_204_NO_CONTENT',
+        return Response(status=204,
                         data={'message': 'Product Destoyed'})
 
 
@@ -123,7 +123,7 @@ def review_list_api_view(request):
         create_review = Review.objects.create(text=text, product_id=product_id, stars=stars)
         create_review.save()
         #3
-        return Response(status='HTTP_201_CREATED',
+        return Response(status=201,
                         data={'message': 'Review created',
                               'create_review': {'id': create_review.id,
                                                 'title': create_review.text}})
@@ -145,12 +145,12 @@ def review_detail_api_view(request, review_id):
         review.product_id = request.data.get('product_id')
         review.stars = request.data.get('stars')
         review.save()
-        return Response(status='HTTP_201_CREATED',
+        return Response(status=201,
                         data={'message': 'Review updated'})
 
     elif request.method == 'DELETE':
         review.delete()
-        return Response(status='HTTP_204_NO_CONTENT',
+        return Response(status=204,
                         data={'message': 'Review Destoyed'})
 
 
