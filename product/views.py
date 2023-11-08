@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from product.models import Category, Product, Review
-from product.serializers import CategorySerializer, ProductSerializer, ReviewSerializer
+from product.serializers import CategorySerializer, ProductSerializer, ReviewSerializer, CategoryCreateValidateSerializer, ProductCreateValidateSerializer, ReviewCreateValidateSerializer
 
 
 
@@ -11,14 +11,22 @@ def category_list_api_view(request):
 
     if request.method == 'GET':
         categories = Category.objects.all()
-        categoryes_json = CategorySerializer(categories, many=True).data
+        categoryes_json = CategorySerializer(instance=categories, many=True).data
         return Response(data=categoryes_json)
 
     elif request.method == 'POST':
+
+        #0
+        serializer = CategoryCreateValidateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(status=400,
+                            data={'message': 'Request failed',
+                                  'errors': serializer.errors})
+
         #1
-        name = request.data.get('name')
+
         #2
-        create_category = Category.objects.create(name=name)
+        create_category = Category.objects.create(**serializer.create_validated_data())
         create_category.save()
         #3
         return Response(status=201,
@@ -50,7 +58,11 @@ def category_detail_api_view(request, category_id):
         return Response(status=204,
                         data={'message': 'Category Destoyed'})
 
-
+    serializer = CategoryCreateValidateSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=400,
+                        data={'message': 'Request failed',
+                              'errors': serializer.errors})
 
 
 #Product----------------------------------------------------
@@ -62,14 +74,16 @@ def product_list_api_view(request):
         return Response(data=products_json)
 
     elif request.method == 'POST':
+        # 0
+        serializer = CategoryCreateValidateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(status=400,
+                            data={'message': 'Request failed',
+                                  'errors': serializer.errors})
         #1
-        title = request.data.get('title')
-        description = request.data.get('description')
-        price = request.data.get('price')
-        category_id = request.data.get('category_id')
+
         #2
-        create_product = Product.objects.create(title=title, description=description,
-                                                 price=price, category_id=category_id)
+        create_product = Product.objects.create(**serializer.create_validated_data())
         create_product.save()
         #3
         return Response(status=201,
@@ -103,7 +117,11 @@ def product_detail_api_view(request, product_id):
         return Response(status=204,
                         data={'message': 'Product Destoyed'})
 
-
+    serializer = CategoryCreateValidateSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=400,
+                        data={'message': 'Request failed',
+                              'errors': serializer.errors})
 
 
 #Review----------------------------------------------------
@@ -115,12 +133,16 @@ def review_list_api_view(request):
         return Response(data=reviews_json)
 
     elif request.method == 'POST':
+        # 0
+        serializer = CategoryCreateValidateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(status=400,
+                            data={'message': 'Request failed',
+                                  'errors': serializer.errors})
         #1
-        text = request.data.get('text')
-        product_id = request.data.get('product_id')
-        stars = request.data.get('stars')
+
         #2
-        create_review = Review.objects.create(text=text, product_id=product_id, stars=stars)
+        create_review = Review.objects.create(**serializer.create_validated_data())
         create_review.save()
         #3
         return Response(status=201,
@@ -153,5 +175,11 @@ def review_detail_api_view(request, review_id):
         return Response(status=204,
                         data={'message': 'Review Destoyed'})
 
+
+    serializer = CategoryCreateValidateSerializer(data=request.data)
+    if not serializer.is_valid():
+        return Response(status=400,
+                        data={'message': 'Request failed',
+                              'errors': serializer.errors})
 
 
