@@ -1,14 +1,15 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from product.models import Category, Product, Review
 from product.serializers import CategorySerializer, ProductSerializer, ReviewSerializer, CategoryCreateValidateSerializer, ProductCreateValidateSerializer, ReviewCreateValidateSerializer
-
+from rest_framework.permissions import IsAuthenticated
 
 
 #Category----------------------------------------------------
 @api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def category_list_api_view(request):
-
+    print(request.user)
     if request.method == 'GET':
         categories = Category.objects.all()
         categoryes_json = CategorySerializer(instance=categories, many=True).data
@@ -66,7 +67,8 @@ def category_detail_api_view(request, category_id):
 
 
 #Product----------------------------------------------------
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def product_list_api_view(request):
     if request.method == 'GET':
         products = Product.objects.all()
@@ -125,7 +127,8 @@ def product_detail_api_view(request, product_id):
 
 
 #Review----------------------------------------------------
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
+@permission_classes([IsAuthenticated])
 def review_list_api_view(request):
     if request.method == 'GET':
         reviews = Review.objects.all()
