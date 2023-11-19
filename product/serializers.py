@@ -1,77 +1,60 @@
 from rest_framework import serializers
-from product.models import Category, Product, Review
+from product.models import Category, Product, Review, Tag
+from rest_framework.exceptions import ValidationError
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class TagSerializers(serializers.ModelSerializer):
     class Meta:
-        model = Category
-        fields = ['id', 'name']
-
-
-
-class ProductSerializer(serializers.ModelSerializer):
-
-    stars = serializers.SerializerMethodField()
-    class Meta:
-        model = Product
-        fields = '__all__'
-        #depth = 1
-
-
-
-class ReviewSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Review
+        model = Tag
         fields = '__all__'
 
 
+class CategorySerializers(serializers.ModelSerializer):
+    products_count = serializers.SerializerMethodField()
 
-
-
-class CategoryCreateValidateSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(required=True, min_length=3)
     class Meta:
         model = Category
-        fields = ['id', 'name']
+        fields = '__all__'
+
+    def get_products_count(self, obj):
+        return obj.products.count()
+        # depth = 1
 
 
-    def create_validated_data(self):
-        validated = self.validated_data
-        return {
-            'name': validated['name']
-        }
-
-class ProductCreateValidateSerializer(serializers.ModelSerializer):
-    title = serializers.CharField(required=True, min_length=3, max_length=70)
-    description = serializers.CharField(required=False, default='There is no description in this product!')
-    price = serializers.IntegerField(required=True)
-    category = serializers.CharField(required=False)
+class ProductSerializers(serializers.ModelSerializer):
+    tag = TagSerializers(many=True, read_only=True)
 
     class Meta:
         model = Product
         fields = '__all__'
 
-    def create_validated_data(self):
-        validated = self.validated_data
-        return {
-            'title': validated['title'],
-            'description': validated['description'],
-            'price': validated['price'],
-            'category': validated['category']
-        }
-class ReviewCreateValidateSerializer(serializers.ModelSerializer):
-    text = serializers.CharField(required=True, min_length=15)
-    product = serializers.CharField(required=True)
-    stars = serializers.IntegerField(required=True)
+    def validate_category_id(self, value):
+        for tag_id in value:
+            try:
+                Tag.objects.get(id=tag_id)
+            except Tag.DoesNotExist:
+                raise ValidationError('Tag does not exixt!')
+        return value
 
+
+class ReviewSerializers(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = '__all__'
 
-    def create_validated_data(self):
-        validated = self.validated_data
-        return {
-            'text': validated['text'],
-            'product': validated['product'],
-            'stars': validated['stars']
-        }
+
+class ProductReviewSerializers(serializers.ModelSerializer):
+    reviews = ReviewSerializers(many=True, read_only=True)
+    average_rating = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+
+    def get_average_rating(self, obj):
+        total_stars = sum(review.stars for review in obj.reviews.all())
+        num_reviews = obj.reviews.count()
+        if num_reviews > 0:
+            return total_stars / num_reviews
+        else:
+            return 0.0

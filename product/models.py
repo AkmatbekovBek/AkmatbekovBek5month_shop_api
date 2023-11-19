@@ -8,32 +8,41 @@ class Category(models.Model):
         return self.name
 
 
-
 class Product(models.Model):
     title = models.CharField(max_length=100)
     description = models.TextField(null=True)
-    price = models.PositiveIntegerField()
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
 
+    tag = models.ManyToManyField('Tag')
 
     def __str__(self):
         return self.title
 
 
 STARS = (
-    (1, '*' *1),
-    (2, '*' *2),
-    (3, '*' *3),
-    (4, '*' *4),
-    (5, '*' *5),
+    (1, '* '),
+    (2, '* ' * 2),
+    (3, '* ' * 3),
+    (4, '* ' * 4),
+    (5, '* ' * 5),
 )
+
+
 class Review(models.Model):
-    text = models.TextField(null=True)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True, related_name='reviews')
-    stars = models.IntegerField(choices=STARS, default=1)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    text = models.TextField()
+    stars = models.IntegerField(choices=STARS, default=5)
 
     def __str__(self):
         return self.text
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
 
 
 
